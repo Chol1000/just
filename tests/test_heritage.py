@@ -1,11 +1,3 @@
-"""Tests for validation, role permissions, and CRUD operations.
-
-Each test uses an in-memory SQLite database, so no files are created
-and tests do not affect the real heritage.db.
-
-Run from the project root with:
-    python -m unittest discover -v
-"""
 
 import unittest
 
@@ -56,7 +48,6 @@ class ServiceTests(unittest.TestCase):
     def tearDown(self):
         self.db.close()
 
-    # Create -------------------------------------------------------------
     def test_add_tradition_saves_record_with_role(self):
         new_id = self.organizer.add_tradition("Umuganura", "Rwandan farmers", "Harvest festival")
         rows = self.organizer.list_traditions()
@@ -79,7 +70,6 @@ class ServiceTests(unittest.TestCase):
         self.volunteer.add_tradition("Intore dance", "Youth group", "Traditional dance")
         self.assertEqual(len(self.volunteer.list_traditions()), 1)
 
-    # Read / search ------------------------------------------------------
     def test_search_matches_name_or_community(self):
         self.organizer.add_tradition("Umuganura", "Rwandan farmers", "Harvest festival")
         self.organizer.add_tradition("Igisoro", "Village elders", "Board game")
@@ -91,7 +81,6 @@ class ServiceTests(unittest.TestCase):
         with self.assertRaises(RecordNotFound):
             self.organizer.get_record(TRADITIONS, 999)
 
-    # Update -------------------------------------------------------------
     def test_update_tradition(self):
         record_id = self.organizer.add_tradition("Old name", "Community", "Desc")
         self.organizer.update_tradition(record_id, "New name", "Community", "Desc")
@@ -109,7 +98,6 @@ class ServiceTests(unittest.TestCase):
         with self.assertRaises(PermissionDenied):
             self.volunteer.update_tradition(record_id, "Changed", "Community", "Desc")
 
-    # Delete -------------------------------------------------------------
     def test_delete_record(self):
         record_id = self.organizer.add_event("Concert", "2026-12-01", "Kigali")
         self.organizer.delete_record(EVENTS, record_id)

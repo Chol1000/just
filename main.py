@@ -1,10 +1,3 @@
-"""Run the Community Culture and Heritage Management System.
-
-Usage:
-    python main.py
-
-Set the HERITAGE_DB environment variable to use a different database file.
-"""
 
 import os
 import sqlite3

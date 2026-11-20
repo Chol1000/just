@@ -1,13 +1,3 @@
-"""Business logic for traditions and events.
-
-The service layer:
-  * validates input before it reaches the database,
-  * checks the current role's permissions,
-  * runs CRUD queries through the Database wrapper,
-  * converts sqlite errors into HeritageError subclasses.
-
-The CLI only calls these methods and never writes SQL itself.
-"""
 
 import sqlite3
 
@@ -20,8 +10,6 @@ from .validators import (
     clean_text,
 )
 
-# Whitelist of table names. Table names cannot be passed as query parameters,
-# so only these known values are ever interpolated into SQL.
 TRADITIONS = "traditions"
 EVENTS = "events"
 _TABLES = {TRADITIONS, EVENTS}
@@ -32,11 +20,7 @@ class HeritageService:
         self.db = db
         self.role = role
 
-    # ------------------------------------------------------------------
-    # Permission and database helpers
-    # ------------------------------------------------------------------
     def can(self, permission):
-        """Return True if the current role holds ``permission``."""
         return has_permission(self.role, permission)
 
     def _require(self, permission):
@@ -61,9 +45,6 @@ class HeritageService:
         if table not in _TABLES:
             raise ValueError(f"Unknown table: {table}")
 
-    # ------------------------------------------------------------------
-    # Create
-    # ------------------------------------------------------------------
     def add_tradition(self, name, community, description):
         self._require(Permission.CREATE)
         name = clean_text(name, "Tradition name")
@@ -88,9 +69,6 @@ class HeritageService:
         )
         return cursor.lastrowid
 
-    # ------------------------------------------------------------------
-    # Read
-    # ------------------------------------------------------------------
     def list_traditions(self, keyword=None):
         self._require(Permission.READ)
         if keyword:
@@ -118,7 +96,6 @@ class HeritageService:
         return [dict(row) for row in rows]
 
     def get_record(self, table, record_id):
-        """Fetch one record from ``table`` or raise RecordNotFound."""
         self._require(Permission.READ)
         self._check_table(table)
         record_id = clean_record_id(record_id)
@@ -130,12 +107,9 @@ class HeritageService:
             raise RecordNotFound(f"No record with ID {record_id} was found.")
         return dict(row)
 
-    # ------------------------------------------------------------------
-    # Update
-    # ------------------------------------------------------------------
     def update_tradition(self, record_id, name, community, description):
         self._require(Permission.UPDATE)
-        self.get_record(TRADITIONS, record_id)  # confirms the record exists
+        self.get_record(TRADITIONS, record_id)
         record_id = clean_record_id(record_id)
         self._write(
             "UPDATE traditions SET name = ?, community = ?, description = ? WHERE id = ?",
@@ -161,9 +135,6 @@ class HeritageService:
             ),
         )
 
-    # ------------------------------------------------------------------
-    # Delete
-    # ------------------------------------------------------------------
     def delete_record(self, table, record_id):
         self._require(Permission.DELETE)
         self._check_table(table)

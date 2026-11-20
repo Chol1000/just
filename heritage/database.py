@@ -1,9 +1,3 @@
-"""Database connection and schema setup (SQLite).
-
-This module owns the connection and table definitions. Business rules live
-in services.py, and the CLI lives in menu.py, so this file can be changed
-without touching either of them.
-"""
 
 import sqlite3
 
@@ -29,11 +23,6 @@ CREATE TABLE IF NOT EXISTS events (
 
 
 class Database:
-    """Thin wrapper around a sqlite3 connection.
-
-    All SQL in the application is passed as parameterized queries, which
-    protects against SQL injection from user-typed text.
-    """
 
     def __init__(self, path=DEFAULT_DB_PATH):
         self.path = path
@@ -44,17 +33,14 @@ class Database:
         self.conn.commit()
 
     def execute(self, sql, params=()):
-        """Run a write statement and commit it. Returns the cursor."""
         cursor = self.conn.execute(sql, params)
         self.conn.commit()
         return cursor
 
     def fetch_all(self, sql, params=()):
-        """Run a read statement and return all rows."""
         return self.conn.execute(sql, params).fetchall()
 
     def fetch_one(self, sql, params=()):
-        """Run a read statement and return one row, or None."""
         return self.conn.execute(sql, params).fetchone()
 
     def close(self):

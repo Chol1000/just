@@ -1,8 +1,3 @@
-"""Terminal (CLI) interface for the Community Culture and Heritage system.
-
-This module handles only presentation: printing menus, asking for input,
-and showing results. All rules and database access happen in services.py.
-"""
 
 from .errors import HeritageError, ValidationError
 from .roles import Permission, Role
@@ -25,11 +20,7 @@ ROLE_OPTIONS = [Role.ORGANIZER, Role.GROUP_LEADER, Role.VOLUNTEER]
 DIVIDER = "-" * 70
 
 
-# ----------------------------------------------------------------------
-# Input helpers
-# ----------------------------------------------------------------------
 def ask(prompt, cleaner):
-    """Keep asking until the input passes ``cleaner``. Returns the cleaned value."""
     while True:
         raw = input(prompt)
         try:
@@ -39,7 +30,6 @@ def ask(prompt, cleaner):
 
 
 def ask_with_default(prompt, current, cleaner):
-    """Ask for a new value. Pressing Enter keeps the current value."""
     while True:
         raw = input(f"{prompt} [{current}]: ")
         if not raw.strip():
@@ -51,7 +41,6 @@ def ask_with_default(prompt, current, cleaner):
 
 
 def choose_role():
-    """Ask the user which role they are acting as. Returns a Role."""
     print("\nWelcome to the Community Culture & Heritage Manager.")
     print("Select your role:")
     for number, role in enumerate(ROLE_OPTIONS, start=1):
@@ -63,9 +52,6 @@ def choose_role():
         print("  ! Invalid choice. Enter a number from the list.")
 
 
-# ----------------------------------------------------------------------
-# Display helpers
-# ----------------------------------------------------------------------
 def print_traditions(rows):
     if not rows:
         print("  (no traditions found)")
@@ -90,9 +76,6 @@ def print_events(rows):
         print(f"     Recorded by : {row['created_by']}")
 
 
-# ----------------------------------------------------------------------
-# Menu application
-# ----------------------------------------------------------------------
 class HeritageCLI:
     def __init__(self, service):
         self.service = service
@@ -106,7 +89,6 @@ class HeritageCLI:
         }
 
     def run(self):
-        """Show the main menu until the user chooses to exit."""
         while True:
             print(MAIN_MENU.format(role=self.service.role.value))
             choice = input("Choose an option: ").strip()
@@ -125,9 +107,6 @@ class HeritageCLI:
             except HeritageError as exc:
                 print(f"  ! {exc}")
 
-    # ------------------------------------------------------------------
-    # Option 1: add tradition
-    # ------------------------------------------------------------------
     def add_tradition(self):
         if not self.service.can(Permission.CREATE):
             raise HeritageError("Your role cannot add records.")
@@ -140,9 +119,6 @@ class HeritageCLI:
         record_id = self.service.add_tradition(name, community, description)
         print(f"  Saved! Tradition #{record_id} '{name}' has been recorded.")
 
-    # ------------------------------------------------------------------
-    # Option 2: record event
-    # ------------------------------------------------------------------
     def record_event(self):
         if not self.service.can(Permission.CREATE):
             raise HeritageError("Your role cannot add records.")
@@ -153,18 +129,12 @@ class HeritageCLI:
         record_id = self.service.add_event(event_name, event_date, location)
         print(f"  Saved! Event #{record_id} '{event_name}' has been recorded.")
 
-    # ------------------------------------------------------------------
-    # Option 3: view all records
-    # ------------------------------------------------------------------
     def view_records(self):
         print("\n--- Saved traditions ---")
         print_traditions(self.service.list_traditions())
         print("\n--- Saved events ---")
         print_events(self.service.list_events())
 
-    # ------------------------------------------------------------------
-    # Option 4: search (bonus)
-    # ------------------------------------------------------------------
     def search_records(self):
         keyword = ask("Search keyword: ", lambda v: clean_text(v, "Keyword"))
         print(f"\n--- Traditions matching '{keyword}' ---")
@@ -172,9 +142,6 @@ class HeritageCLI:
         print(f"\n--- Events matching '{keyword}' ---")
         print_events(self.service.list_events(keyword))
 
-    # ------------------------------------------------------------------
-    # Option 5: update (bonus)
-    # ------------------------------------------------------------------
     def update_record(self):
         if not self.service.can(Permission.UPDATE):
             raise HeritageError("Your role cannot update records.")
@@ -208,9 +175,6 @@ class HeritageCLI:
             self.service.update_event(record_id, event_name, event_date, location)
         print(f"  Record #{record_id} has been updated.")
 
-    # ------------------------------------------------------------------
-    # Option 6: delete (bonus)
-    # ------------------------------------------------------------------
     def delete_record(self):
         if not self.service.can(Permission.DELETE):
             raise HeritageError("Your role cannot delete records.")
@@ -226,9 +190,6 @@ class HeritageCLI:
         self.service.delete_record(table, record_id)
         print(f"  Record #{record_id} has been deleted.")
 
-    # ------------------------------------------------------------------
-    # Helpers
-    # ------------------------------------------------------------------
     def _pick_record_type(self, verb):
         print(f"\nWhich type of record do you want to {verb}?")
         print("  1. Cultural tradition")
