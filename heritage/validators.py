@@ -1,5 +1,5 @@
 
-from datetime import datetime
+from datetime import date
 
 from .errors import ValidationError
 
@@ -23,7 +23,7 @@ def clean_date(value):
     if not text:
         raise ValidationError("Event date is required.")
     try:
-        return datetime.strptime(text, "%Y-%m-%d").date().isoformat()
+        return date.fromisoformat(text).isoformat()
     except ValueError:
         raise ValidationError(
             "Date must use the format YYYY-MM-DD (for example 2026-12-05)."
