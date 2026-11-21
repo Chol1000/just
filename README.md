@@ -137,4 +137,4 @@ They use an in-memory database, so they never touch `heritage.db`.
 | Adriel Adonijah Nakoye Mrangaye     | Terminal UI design                  |
 | Davina Uwase                        | Flowchart and system design         |
 | Luxe Gaultier Gayawira              | Features and database design        |
-| Deng & Calvin                       | Testing and quality assurance       |
+| Esther Mbonigaba Mwamikazi          | Testing and quality assurance       |
